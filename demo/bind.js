@@ -44,100 +44,97 @@ function extend(obj, props) {
   return obj;
 }
 
-function parseElement(element, model, uid){
-  var that = this;
+function parseElement(element, vm){
   for (var i = 0; i < element.attributes.length; i++) {
-    bindType(element,  element.attributes[i], model, uid);
+    bindType(element,  element.attributes[i], vm);
   }  
   for (var j = 0; j < element.children.length; j++) {
-    parseElement(element.children[j], model, uid);
+    parseElement(element.children[j], vm);
   }  
 }
 
-function bind(obj, uid){
-  for(prop in obj){
-    var val = obj[prop];
-    if(typeof val != 'function'){
-      defineProp(obj, prop);      
-    }
-    obj[prop] = val;
-  }
-  function defineProp(obj, prop){
-    var innerProp = "_" + prop;
-    Object.defineProperty(obj, prop, {
-      set: function(value) {
-        var oldVal = this[innerProp];
-        this[innerProp] = value;
-        Event.fire({
-          type: prop+ uid,
-          oldVal: oldVal,
-          val: value
-        })
-        console.log('trigger set: ', prop, value, oldVal);
-      },
-      get: function() {
-        console.log('trigger get: ', prop, this[innerProp]);
-        return this[innerProp];
-      },
-      enumerable: true,
-      configurable: true
-    });
-  }  
-  return obj;
-}
-
-function bindType(element, attr, model, uid) {
+function bindType(element, attr, model) {
   if (attr.name.indexOf("v-") === 0) {
     var type = attr.name.slice(2);
-
     switch( type ){
       case "value":
-      bindValue(element, attr.value, model, uid);
+      bindValue(element, attr.value, model);
       break;
       case "click":
-      bindClick(element, attr.value, model, uid);
+      bindClick(element, attr.value, model);
       default:
       return false;
     }
   }
 }
-function bindValue(element, key, vm, uid){
+
+function bindValue(element, key, vm){
   var tagName = element.tagName.toLowerCase();
+  vm.$watch(key, function(val, oldVal){
+    switch (tagName) {
+      case "input":
+        element.value = val;
+        break;
+      case "p":
+        element.textContent = val;
+        break;
+      default:
+        element.textContent = val;
+    }
+  });
+  
   element.addEventListener('keyup', function(){
     vm[key] = element.value;
   }, false);
-  Event.on(key + uid, function(event){
-    switch (tagName) {
-      case "input":
-        element.value = event.val;
-        break;
-      case "p":
-        element.textContent = event.val;
-        break;
-      default:
-        element.textContent = event.val;
-    }    
-  }); 
 }
 
-function bindClick(element, key, vm, uid){
+function bindClick(element, key, vm){
   element.addEventListener('click', function(){
     vm[key].call(vm);
   }, false);  
 }
 
+var VM = {
+  $watchers: {},
+  $watch: function(key, watcher){
+    if(!this.$watchers[key]){
+      this.$watchers[key] = {
+        value: this[key],
+        list:[]
+      };
+      Object.defineProperty(this, key, {
+        set: function(value) {
+          console.log('set:',key, value);
+          var oldVal = this.$watchers[key].value;
+          this.$watchers[key].value = value;
+          for( var i = 0; i < this.$watchers[key].list.length; i++){
+            this.$watchers[key].list[i](value, oldVal);
+          };
+        },
+        get: function() {
+          return this.$watchers[key].value;
+        },
+        enumerable: true,
+        configurable: true
+      });
+    };
+    this.$watchers[key].list.push(watcher);  
+    this[key] = this.$watchers[key].value;
+  }
+}
+
 function Vue(config) {
   this.init.call(this, config);
 }
+
 extend(Vue.prototype, {
   init: function(config) {
     this.$uid = "Vue" + Math.random() + Date.now();
     this.$ele = document.querySelector(config.el) || document.body;
-    this.$parseElement(this.$ele, config.data, this.$uid);
-    this.$data = this.$bind(config.data, this.$uid);
+    this.$vm = extend(config.data, VM);
+    this.$parseElement(this.$ele, this.$vm);
   },
-  $parseElement: parseElement, 
-  $bind: bind
+  $parseElement: parseElement
 })
 
 var app = new Vue({
@@ -149,7 +146,7 @@ var app = new Vue({
       this.age++;
     }
   }
-})
+});
 
 var test = new Vue({
   el:'#test',
@@ -160,4 +157,4 @@ var test = new Vue({
       this.age++;
     }    
   }
-})
+});
