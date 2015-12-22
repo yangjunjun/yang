@@ -6,19 +6,32 @@
 </head>
 <body>
   <div id="app">
-    <input type="text" v-value="name" />
+    <input v-value="newTodo">
+    <ul>
+      <li v-for="todo in todos">
+        <span>{{todo.text}}</span>
+        <button v-click="removeTodo($index)">X</button>
+      </li>       
+    </ul>
+    <button v-click="push">push</button>
+   
+<!--     <input type="text" v-value="name" />
+    <p>hello {{name}}</p>
+    <p>我是{{name}}， age: {{age}}, geder: {{gender}}</p>
     <p v-value="name"></p>
     <input type="text" v-value="age" />
     <p v-value="age"></p>    
-    <button v-click="add">add</button>
+    <button v-click="add">add</button> -->
   </div>
-  <div id="test">
+
+<!--   <div id="test">
     <input type="text" v-value="name" />
+    <p>我是{{name}}， age: {{age}}, geder: {{gender}}</p>
     <p v-value="name"></p>
     <input type="text" v-value="age" />
     <p v-value="age"></p>    
     <button v-click="add">add</button>
-  </div>  
+  </div>   -->
 <script src="bind.js"></script>  
 </body>
 </html>
