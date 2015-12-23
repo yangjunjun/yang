@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>tode</title>
+</head>
+<body>
+<div id="app">
+  <input v-value="newTodo">
+  <ul>
+    <li v-for="todo in todos">
+      <span>{{todo.text}}</span>
+      <button v-click="removeTodo($index)">X</button>
+    </li>
+  </ul>
+  <button v-click="push">push</button>
+<script src="bind.js"></script>  
+<script>
+new Vue({
+  el:'#app',
+  data: {
+    newTodo: '',
+    todos: [
+      { text: 'Learn JavaScript' },
+      { text: 'Learn Vue.js' },
+      { text: 'Build Something Awesome' }
+    ], 
+    push: function(){
+      if(!!this.newTodo){
+        this.todos.push({
+          text: this.newTodo
+        });
+        this.todos = clone(this.todos);
+        this.newTodo = "";        
+      }
+    },
+    removeTodo:function(index){
+      var temp = clone(this.todos);
+      temp.splice(index, 1);
+      this.todos = temp;
+    }
+  }
+});  
+</script>
+</body>
+</html>

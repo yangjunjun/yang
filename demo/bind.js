@@ -76,23 +76,25 @@ function parseElement(element, vm){
   }  
 }
 
-function bindType(element, attr, model) {
-  if (attr.name.indexOf("v-") === 0) {
-    var type = attr.name.slice(2);
-    switch( type ){
-      case "value":
-      bindValue(element, attr.value, model);
-      break;
-      case "click":
-      bindClick(element, attr.value, model);
-      break;
-      case "for":
-      bindFor(element, attr.value, model);
-      break;
-      default:
-      return false;
-    }
-  }
+function bindType(element, attr, vm) {
+  setTimeout(function(){
+    if (attr.name.indexOf("v-") === 0) {
+      var type = attr.name.slice(2);
+      switch( type ){
+        case "value":
+        bindValue(element, attr.value, vm);
+        break;
+        case "click":
+        bindClick(element, attr.value, vm);
+        break;
+        case "for":
+        bindFor(element, attr.value, vm);
+        break;
+        default:
+        return false;
+      }
+    }    
+  },0);
 }
 
 function bindHTML(element, vm){
@@ -136,8 +138,8 @@ function bindFor(element, key, vm){
   var text = element.innerHTML;
   var result = [];
   var prop = key.split(' ')[0];
-  var key =  key.split(' ')[2]
-  var reg = new RegExp("{{todo\\.(\\w*)}}","g");
+  var key =  key.split(' ')[2];
+  var reg = new RegExp("{{" + prop +"\\.(\\w*)}}","g");
   vm.$watch(key, function(val, oldVal){
     parentEle.innerHTML = "";
     val.forEach(function(item, index){
@@ -199,52 +201,8 @@ function Vue(config) {
 
 extend(Vue.prototype, {
   init: function(config) {
-    this.$uid = "Vue" + Math.random() + Date.now();
     this.$ele = document.querySelector(config.el) || document.body;
     this.$vm = extend(config.data, VM);
-    this.$parseElement(this.$ele, this.$vm);
-  },
-  $parseElement: parseElement
-})
-
-// var app = new Vue({
-//   el:'#app',
-//   data: {
-//     name:'yangjunjun',
-//     age: 26,
-//     gender: 'male',
-//     newTodo: '',
-//     todos: [
-//       { text: 'Learn JavaScript' },
-//       { text: 'Learn Vue.js' },
-//       { text: 'Build Something Awesome' }
-//     ],    
-//     add: function(){
-//       this.age++;
-//     },
-//     push: function(){
-//       this.todos.push({
-//         text: this.newTodo
-//       });
-//       this.todos = clone(this.todos);
-//       this.newTodo = "";
-//     },
-//     removeTodo:function(index){
-//       var temp = clone(this.todos);
-//       temp.splice(index, 1);
-//       this.todos = temp;
-//     }
-//   }
-// }); 
-
-// var test = new Vue({
-//   el:'#test',
-//   data: {
-//     name:'yangjunjuntest',
-//     age: 52,
-//     gender: 'male',
-//     add: function(){
-//       this.age++;
-//     }
-//   }
-// });
+    parseElement(this.$ele, this.$vm);
+  }
+});
