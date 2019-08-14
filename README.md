@@ -4,5 +4,5 @@ yang.js 是学习[许飞](https://github.com/xufei)大神 [thin](https://github.
 
 ## demo 
 
-1. http://v2ee.com/yang/demo/bind.html
-2. http://v2ee.com/yang/demo/todo.html
+1. http://yangjunjun.github.io/yang/demo/bind.html
+2. http://yangjunjun.github.io/yang/demo/todo.html
